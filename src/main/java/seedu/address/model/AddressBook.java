@@ -193,4 +193,14 @@ public class AddressBook implements ReadOnlyAddressBook {
         // use this method for custom fields hashing instead of implementing your own
         return Objects.hash(persons, tags);
     }
+
+    public void removeTag(Tag tag) throws  PersonNotFoundException, DuplicatePersonException{
+        for(ReadOnlyPerson thisPerson: getPersonList()){
+            Person thisPerson1=new Person(thisPerson);
+            Set<Tag> tags=thisPerson1.getTags();
+            tags.remove(tag);
+            thisPerson1.setTags(tags);
+            updatePerson(thisPerson, thisPerson1);
+        }
+    }
 }
