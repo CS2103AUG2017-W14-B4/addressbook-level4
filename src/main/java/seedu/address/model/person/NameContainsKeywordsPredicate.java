@@ -22,7 +22,9 @@ public class NameContainsKeywordsPredicate implements Predicate<ReadOnlyPerson> 
         if (flag.equals("t/")) {
             String tagName = "[" + keywords.get(0).substring(2) + "]";
             for (Tag tag :person.getTags()){
-                if (tag.toString().equals(tagName)) return true;
+                if (tag.toString().equals(tagName)){
+                    return true;
+                }
             }
             return false;
         }
