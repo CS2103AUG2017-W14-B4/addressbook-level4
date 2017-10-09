@@ -7,6 +7,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import seedu.address.model.person.ReadOnlyPerson;
+import seedu.address.model.tag.Tag;
 
 /**
  * An UI component that displays information of a {@code Person}.
@@ -83,5 +84,9 @@ public class PersonCard extends UiPart<Region> {
         PersonCard card = (PersonCard) other;
         return id.getText().equals(card.id.getText())
                 && person.equals(card.person);
+    }
+
+    public void highlitTag(Tag tag){
+
     }
 }
