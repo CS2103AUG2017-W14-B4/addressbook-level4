@@ -10,10 +10,14 @@ import java.util.Objects;
 import java.util.Set;
 
 import javafx.collections.ObservableList;
+import seedu.address.model.event.Event;
+import seedu.address.model.event.ReadOnlyEvent;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.ReadOnlyPerson;
 import seedu.address.model.person.UniquePersonList;
 import seedu.address.model.person.exceptions.DuplicatePersonException;
+import seedu.address.model.person.exceptions.HaveParticipateEventException;
+import seedu.address.model.person.exceptions.NotParticipateEventException;
 import seedu.address.model.person.exceptions.PersonNotFoundException;
 import seedu.address.model.tag.Tag;
 import seedu.address.model.tag.UniqueTagList;
@@ -26,6 +30,7 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     private final UniquePersonList persons;
     private final UniqueTagList tags;
+    //private final UniqueEventList events;
 
     /*
      * The 'unusual' code block below is an non-static initialization block, sometimes used to avoid duplication
@@ -42,7 +47,7 @@ public class AddressBook implements ReadOnlyAddressBook {
     public AddressBook() {}
 
     /**
-     * Creates an AddressBook using the Persons and Tags in the {@code toBeCopied}
+     * Creates an AddressBook using the Persons and Tags and events in the {@code toBeCopied}
      */
     public AddressBook(ReadOnlyAddressBook toBeCopied) {
         this();
@@ -59,6 +64,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         this.tags.setTags(tags);
     }
 
+
     /**
      * Resets the existing data of this {@code AddressBook} with {@code newData}.
      */
@@ -72,6 +78,13 @@ public class AddressBook implements ReadOnlyAddressBook {
 
         setTags(new HashSet<>(newData.getTagList()));
         syncMasterTagListWith(persons);
+    }
+
+    /**
+     * Sorts the person list.
+     */
+    public void sortPersons() {
+        persons.sort();
     }
 
     //// person-level operations
@@ -90,6 +103,16 @@ public class AddressBook implements ReadOnlyAddressBook {
         // This can cause the tags master list to have additional tags that are not tagged to any person
         // in the person list.
         persons.add(newPerson);
+    }
+
+    /**
+     * Adds a person to the specific position in list.
+     * Only used to undo deletion
+     */
+    public void addPerson(int position, ReadOnlyPerson p) {
+        Person newPerson = new Person(p);
+        syncMasterTagListWith(newPerson);
+        persons.add(position, newPerson);
     }
 
     /**
@@ -145,6 +168,32 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
+     * Remove tags that only in this deleted person
+     */
+    public void separateMasterTagListWith(Set<Tag> tagsToRemove) {
+        for (Tag tag : tagsToRemove) {
+            tags.remove(tag);
+        }
+    }
+
+    /**
+     * A Javadoc method.
+     * Get the tags in the new-added person, but not in the list
+     */
+    public Set<Tag> extractNewTags(ReadOnlyPerson person) {
+        Set<Tag> personTags = person.getTags();
+        Set<Tag> newTags = new HashSet<Tag>();
+
+        for (Tag tag : personTags) {
+            if (!tags.contains(tag)) {
+                newTags.add(tag);
+            }
+        }
+
+        return newTags;
+    }
+
+    /**
      * Removes {@code key} from this {@code AddressBook}.
      * @throws PersonNotFoundException if the {@code key} is not in this {@code AddressBook}.
      */
@@ -162,6 +211,13 @@ public class AddressBook implements ReadOnlyAddressBook {
         tags.add(t);
     }
 
+    public void removeParticipation(Person person, ReadOnlyEvent event) throws NotParticipateEventException {
+        persons.removeParticipateEvent(person, event);
+    }
+
+    public void addParticipation(Person person, Event event) throws HaveParticipateEventException {
+        persons.addParticipateEvent(person, event);
+    }
     //// util methods
 
     @Override

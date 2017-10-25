@@ -2,6 +2,9 @@ package seedu.address.model.person;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -10,7 +13,13 @@ import org.fxmisc.easybind.EasyBind;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seedu.address.commons.util.CollectionUtil;
+import seedu.address.model.event.Event;
+import seedu.address.model.event.ReadOnlyEvent;
+import seedu.address.model.event.exceptions.DuplicateEventException;
+import seedu.address.model.event.exceptions.EventNotFoundException;
 import seedu.address.model.person.exceptions.DuplicatePersonException;
+import seedu.address.model.person.exceptions.HaveParticipateEventException;
+import seedu.address.model.person.exceptions.NotParticipateEventException;
 import seedu.address.model.person.exceptions.PersonNotFoundException;
 
 /**
@@ -49,6 +58,24 @@ public class UniquePersonList implements Iterable<Person> {
     }
 
     /**
+     * Adds a person to the specific position in list.
+     * Only used to undo deletion
+     */
+    public void add(int position, ReadOnlyPerson toAdd) {
+        requireNonNull(toAdd);
+        internalList.add(position, new Person(toAdd));
+    }
+
+    /**
+     * Sorts the person list.
+     */
+    public void sort() {
+        Collections.sort(internalList, new Comparator<Person>() {
+            public int compare (Person p1, Person p2) {
+                return p1.getName().toString().compareTo(p2.getName().toString()); } });
+    }
+
+    /**
      * Replaces the person {@code target} in the list with {@code editedPerson}.
      *
      * @throws DuplicatePersonException if the replacement is equivalent to another existing person in the list.
@@ -82,6 +109,31 @@ public class UniquePersonList implements Iterable<Person> {
             throw new PersonNotFoundException();
         }
         return personFoundAndDeleted;
+    }
+
+    /**
+     * Remove a specific person from the participant list of an event
+     */
+    public void removeParticipateEvent(Person targetPerson, ReadOnlyEvent participatedEvent)
+            throws NotParticipateEventException {
+
+        try {
+            targetPerson.removeParticipateEvent(participatedEvent);
+        } catch (EventNotFoundException pnfe) {
+            throw new NotParticipateEventException();
+        }
+
+    }
+
+    /**
+     * Add a specific person to the participant list of an event
+     */
+    public void addParticipateEvent(Person targetPerson, Event participateEvent) throws HaveParticipateEventException {
+        try {
+            targetPerson.addParticipateEvent(participateEvent);
+        } catch (DuplicateEventException dpe) {
+            throw new HaveParticipateEventException();
+        }
     }
 
     public void setPersons(UniquePersonList replacement) {
